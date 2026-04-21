@@ -1,0 +1,21 @@
+{
+  "name": "rocker",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "rocker.app",
+    "productName": "Rocker",
+    "asar": true,
+    "win": {
+      "target": "portable"
+    }
+  }
+}
