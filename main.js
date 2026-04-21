@@ -4,7 +4,7 @@ const os = require("os");
 const fs = require("fs");
 const { Worker } = require("worker_threads");
 
-const EXTENSIONS = [".txt", ".docx", ".pdf", ".xlsx"];
+const EXTENSIONS = [".txt", ".docx", ".pdf", ".xlsx", '.xls', '.csv', '.doc'];
 
 function createWindow() {
   const win = new BrowserWindow({
