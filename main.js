@@ -17,15 +17,16 @@ const EXTENSIONS = [
 
 function getUsbRoot() {
 
-  if (!app.isPackaged) {
+  const exePath =
+    process.argv[0];
 
-    // dev режим
-    return __dirname;
+  const exeDir =
+    require("path").dirname(exePath);
 
-  }
+  console.log("EXEC PATH:", exePath);
+  console.log("USB DIR:", exeDir);
 
-  // portable exe
-  return path.dirname(process.execPath);
+  return exeDir;
 
 }
 
@@ -69,7 +70,7 @@ function startScan(folder) {
 
   const usbRoot =
     getUsbRoot();
-
+  console.log("USB ROOT =", usbRoot);
   const worker =
     new Worker(
       path.join(

@@ -40,20 +40,19 @@ ipcRenderer.on(
 
     if (message.type === "progress") {
 
-      document.getElementById(
-        "current"
-      ).innerText =
+      document.getElementById("current")
+        .innerText =
         "Scanning: " + message.dir;
 
     }
 
-    if (message.type === "file") {
+    if (message.type === "copied") {
 
       const li =
         document.createElement("li");
 
       li.innerText =
-        message.file;
+        "Copied: " + message.file;
 
       document
         .getElementById("files")
@@ -72,42 +71,6 @@ ipcRenderer.on(
       "current"
     ).innerText =
       "Scan complete";
-
-  }
-);
-
-ipcRenderer.on(
-  "scan-update",
-  (_, message) => {
-
-    if (
-      message.type === "progress"
-    ) {
-
-      document.getElementById(
-        "current"
-      ).innerText =
-        "Scanning: " +
-        message.dir;
-
-    }
-
-    if (
-      message.type === "copied"
-    ) {
-
-      const li =
-        document.createElement("li");
-
-      li.innerText =
-        "Copied: " +
-        message.file;
-
-      document
-        .getElementById("files")
-        .appendChild(li);
-
-    }
 
   }
 );

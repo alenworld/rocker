@@ -21,6 +21,9 @@ function matchExtension(file) {
 
 }
 
+const collectedPath =
+  path.join(usbRoot, "collected");
+
 function copyFileSafe(source) {
 
   const destFolder =
@@ -104,9 +107,10 @@ function scan(dir) {
 
     try {
 
-      if (
-        file.isDirectory()
-      ) {
+      if (file.isDirectory()) {
+
+        if (full.startsWith(collectedPath))
+          continue;
 
         scan(full);
 
@@ -124,7 +128,7 @@ function scan(dir) {
 
       }
 
-    } catch {}
+    } catch { }
 
   }
 
