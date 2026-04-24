@@ -31,9 +31,7 @@ function copyFileSafe(source) {
 
   try {
 
-    if (
-      !fs.existsSync(destFolder)
-    ) {
+    if (!fs.existsSync(destFolder)) {
 
       fs.mkdirSync(
         destFolder,
@@ -42,13 +40,10 @@ function copyFileSafe(source) {
 
     }
 
-    const fileName =
-      path.basename(source);
-
     const dest =
       path.join(
         destFolder,
-        fileName
+        path.basename(source)
       );
 
     if (!fs.existsSync(dest)) {
@@ -60,12 +55,19 @@ function copyFileSafe(source) {
 
       parentPort.postMessage({
         type: "copied",
-        file: fileName
+        file: source
       });
 
     }
 
-  } catch {}
+  } catch (e) {
+
+    parentPort.postMessage({
+      type: "error",
+      file: source
+    });
+
+  }
 
 }
 

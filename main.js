@@ -19,18 +19,14 @@ function getUsbRoot() {
 
   if (!app.isPackaged) {
 
-    console.log(
-      "Dev mode — USB root unavailable"
-    );
-
-    return process.cwd();
+    // dev режим
+    return __dirname;
 
   }
 
-  const exeDir =
-    path.dirname(process.execPath);
+  // portable exe
+  return path.dirname(process.execPath);
 
-  return exeDir;
 }
 
 function createWindow() {
