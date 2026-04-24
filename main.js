@@ -17,10 +17,20 @@ const EXTENSIONS = [
 
 function getUsbRoot() {
 
-  return path.parse(
-    process.execPath
-  ).root;
+  if (!app.isPackaged) {
 
+    console.log(
+      "Dev mode — USB root unavailable"
+    );
+
+    return process.cwd();
+
+  }
+
+  const exeDir =
+    path.dirname(process.execPath);
+
+  return exeDir;
 }
 
 function createWindow() {
