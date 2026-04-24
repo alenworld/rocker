@@ -1,50 +1,76 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const path = require("path");
-const os = require("os");
-const fs = require("fs");
 const { Worker } = require("worker_threads");
 
-const EXTENSIONS = [".txt", ".docx", ".pdf", ".xlsx", '.xls', '.csv', '.doc'];
+let mainWindow;
+
+const EXTENSIONS = [
+  ".txt",
+  ".docx",
+  ".pdf",
+  ".xlsx",
+  ".xls",
+  ".csv",
+  ".doc"
+];
 
 function createWindow() {
-  const win = new BrowserWindow({
-    width: 400,
-    height: 250
+  mainWindow = new BrowserWindow({
+    width: 600,
+    height: 500,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
   });
 
-  win.loadFile("index.html");
-
-  startScan();
+  mainWindow.loadFile("index.html");
 }
 
-function getUsbRoot() {
-  return path.parse(process.execPath).root;
-}
+ipcMain.handle("select-folder", async () => {
 
-function getAllDrives() {
-  const letters = "CDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const result = await dialog.showOpenDialog({
+    properties: ["openDirectory"]
+  });
 
-  return letters
-    .map(letter => `${letter}:\\`)
-    .filter(drive => fs.existsSync(drive));
-}
+  if (result.canceled) return;
 
-function startScan() {
-  const usbRoot = getUsbRoot();
+  const folder = result.filePaths[0];
 
-  console.log("USB detected:", usbRoot);
+  startScan(folder);
 
-  const drives = getAllDrives().filter(d => d !== usbRoot);
+  return folder;
+});
 
-  drives.forEach(drive => {
-    new Worker(path.join(__dirname, "worker.js"), {
+function startScan(folder) {
+
+  const worker = new Worker(
+    path.join(__dirname, "worker.js"),
+    {
       workerData: {
-        drive,
-        usbRoot,
+        folder,
         extensions: EXTENSIONS
       }
-    });
+    }
+  );
+
+  worker.on("message", message => {
+
+    mainWindow.webContents.send(
+      "scan-update",
+      message
+    );
+
   });
+
+  worker.on("exit", () => {
+
+    mainWindow.webContents.send(
+      "scan-complete"
+    );
+
+  });
+
 }
 
 app.whenReady().then(createWindow);
