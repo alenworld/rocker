@@ -17,16 +17,7 @@ const EXTENSIONS = [
 
 function getUsbRoot() {
 
-  const exePath =
-    process.argv[0];
-
-  const exeDir =
-    require("path").dirname(exePath);
-
-  console.log("EXEC PATH:", exePath);
-  console.log("USB DIR:", exeDir);
-
-  return exeDir;
+  return path.dirname(process.execPath);
 
 }
 
@@ -71,6 +62,10 @@ function startScan(folder) {
   const usbRoot =
     getUsbRoot();
   console.log("USB ROOT =", usbRoot);
+  fs.writeFileSync(
+    path.join(usbRoot, "debug.txt"),
+    "hello from usb"
+  );
   const worker =
     new Worker(
       path.join(
