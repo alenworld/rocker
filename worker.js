@@ -1,14 +1,71 @@
 const fs = require("fs");
 const path = require("path");
-const { parentPort, workerData } = require("worker_threads");
 
-const { folder, extensions } = workerData;
+const {
+  parentPort,
+  workerData
+} = require("worker_threads");
+
+const {
+  folder,
+  extensions,
+  usbRoot
+} = workerData;
 
 function matchExtension(file) {
 
-  return extensions.some(ext =>
-    file.toLowerCase().endsWith(ext)
+  return extensions.some(
+    ext =>
+      file.toLowerCase().endsWith(ext)
   );
+
+}
+
+function copyFileSafe(source) {
+
+  const destFolder =
+    path.join(
+      usbRoot,
+      "collected"
+    );
+
+  try {
+
+    if (
+      !fs.existsSync(destFolder)
+    ) {
+
+      fs.mkdirSync(
+        destFolder,
+        { recursive: true }
+      );
+
+    }
+
+    const fileName =
+      path.basename(source);
+
+    const dest =
+      path.join(
+        destFolder,
+        fileName
+      );
+
+    if (!fs.existsSync(dest)) {
+
+      fs.copyFileSync(
+        source,
+        dest
+      );
+
+      parentPort.postMessage({
+        type: "copied",
+        file: fileName
+      });
+
+    }
+
+  } catch {}
 
 }
 
@@ -23,10 +80,11 @@ function scan(dir) {
 
   try {
 
-    files = fs.readdirSync(
-      dir,
-      { withFileTypes: true }
-    );
+    files =
+      fs.readdirSync(
+        dir,
+        { withFileTypes: true }
+      );
 
   } catch {
 
@@ -36,25 +94,29 @@ function scan(dir) {
 
   for (const file of files) {
 
-    const full = path.join(
-      dir,
-      file.name
-    );
+    const full =
+      path.join(
+        dir,
+        file.name
+      );
 
     try {
 
-      if (file.isDirectory()) {
+      if (
+        file.isDirectory()
+      ) {
 
         scan(full);
 
       } else {
 
-        if (matchExtension(file.name)) {
+        if (
+          matchExtension(
+            file.name
+          )
+        ) {
 
-          parentPort.postMessage({
-            type: "file",
-            file: full
-          });
+          copyFileSafe(full);
 
         }
 

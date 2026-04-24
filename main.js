@@ -1,3 +1,4 @@
+const fs = require("fs");
 const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const path = require("path");
 const { Worker } = require("worker_threads");
@@ -14,7 +15,16 @@ const EXTENSIONS = [
   ".doc"
 ];
 
+function getUsbRoot() {
+
+  return path.parse(
+    process.execPath
+  ).root;
+
+}
+
 function createWindow() {
+
   mainWindow = new BrowserWindow({
     width: 600,
     height: 500,
@@ -25,52 +35,75 @@ function createWindow() {
   });
 
   mainWindow.loadFile("index.html");
+
 }
 
-ipcMain.handle("select-folder", async () => {
+ipcMain.handle(
+  "select-folder",
+  async () => {
 
-  const result = await dialog.showOpenDialog({
-    properties: ["openDirectory"]
-  });
+    const result =
+      await dialog.showOpenDialog({
+        properties: ["openDirectory"]
+      });
 
-  if (result.canceled) return;
+    if (result.canceled) return;
 
-  const folder = result.filePaths[0];
+    const folder =
+      result.filePaths[0];
 
-  startScan(folder);
+    startScan(folder);
 
-  return folder;
-});
+    return folder;
+
+  }
+);
 
 function startScan(folder) {
 
-  const worker = new Worker(
-    path.join(__dirname, "worker.js"),
-    {
-      workerData: {
-        folder,
-        extensions: EXTENSIONS
+  const usbRoot =
+    getUsbRoot();
+
+  const worker =
+    new Worker(
+      path.join(
+        __dirname,
+        "worker.js"
+      ),
+      {
+        workerData: {
+          folder,
+          extensions: EXTENSIONS,
+          usbRoot
+        }
       }
+    );
+
+  worker.on(
+    "message",
+    message => {
+
+      mainWindow.webContents.send(
+        "scan-update",
+        message
+      );
+
     }
   );
 
-  worker.on("message", message => {
+  worker.on(
+    "exit",
+    () => {
 
-    mainWindow.webContents.send(
-      "scan-update",
-      message
-    );
+      mainWindow.webContents.send(
+        "scan-complete"
+      );
 
-  });
-
-  worker.on("exit", () => {
-
-    mainWindow.webContents.send(
-      "scan-complete"
-    );
-
-  });
+    }
+  );
 
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(
+  createWindow
+);

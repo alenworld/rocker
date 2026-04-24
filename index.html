@@ -1,58 +1,28 @@
-<!DOCTYPE html>
-<html>
-<body>
-
-<h2>File Scanner</h2>
-
-<button onclick="selectFolder()">
-  Select folder
-</button>
-
-<p id="current"></p>
-
-<ul id="files"></ul>
-
-<script>
-
-const { ipcRenderer } = require("electron");
-
-async function selectFolder() {
-
-  const folder =
-    await ipcRenderer.invoke(
-      "select-folder"
-    );
-
-  if (folder) {
-
-    document.getElementById(
-      "current"
-    ).innerText =
-      "Scanning: " + folder;
-
-  }
-
-}
-
 ipcRenderer.on(
   "scan-update",
   (_, message) => {
 
-    if (message.type === "progress") {
+    if (
+      message.type === "progress"
+    ) {
 
       document.getElementById(
         "current"
       ).innerText =
-        "Scanning: " + message.dir;
+        "Scanning: " +
+        message.dir;
 
     }
 
-    if (message.type === "file") {
+    if (
+      message.type === "copied"
+    ) {
 
       const li =
         document.createElement("li");
 
       li.innerText =
+        "Copied: " +
         message.file;
 
       document
@@ -63,20 +33,3 @@ ipcRenderer.on(
 
   }
 );
-
-ipcRenderer.on(
-  "scan-complete",
-  () => {
-
-    document.getElementById(
-      "current"
-    ).innerText =
-      "Scan complete";
-
-  }
-);
-
-</script>
-
-</body>
-</html>
